@@ -1,0 +1,22 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: gw-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save "" --appendonly no
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: gw-postgres
+    environment:
+      POSTGRES_USER: gateway
+      POSTGRES_PASSWORD: gateway
+      POSTGRES_DB: semantic_cache
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
