@@ -1,6 +1,6 @@
 import { response, Router } from "express";
 import { provider } from "../providers";
-
+import *  as exactCache from "../cache/exact";
 
 export const chatRouter = Router();
 
@@ -14,9 +14,25 @@ chatRouter.post("/chat", async (req, res) => {
     }
 
     const startedAt = Date.now();
+    const key = exactCache.buildKey(prompt);
 
+    const cached = await exactCache.get(key);
+    if(cached) {
+        return res.json({
+            response: cached.text,
+            cache: "exact",
+            latency_ms: Date.now() - startedAt,
+            model: cached.model,
+            usage: {
+                prompt_tokens: cached.promptTokens,
+                completion_tokens:cached.completionTokens
+            }
+        })
+    }
+    
     try{
         const result = await provider.complete(prompt);
+        await exactCache.set(key, result);
         
         return res.json({
             response: result.text,
@@ -29,7 +45,11 @@ chatRouter.post("/chat", async (req, res) => {
             },
         });
     } catch (err) {
-        console.log("Provider call failed:", err);
-        return res.status(502).json({error: "Upstream provider call failed"});
+        const detail = err instanceof Error ? err.message : String(err);
+        console.log("Provider call failed:", detail);
+        return res.status(502).json({
+            error: "Upstream provider call failed",
+            detail,
+        });
     }
 });

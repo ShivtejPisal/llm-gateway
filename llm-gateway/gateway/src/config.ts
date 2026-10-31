@@ -9,6 +9,8 @@ export const config = {
   groqApiKey: process.env.GROQ_API_KEY ?? "",
   model: process.env.MODEL ?? "openai/gpt-oss-120b",
   mockLatencyMs: Number(process.env.MOCK_LATENCY_MS ?? 800),
+  redisUrl: process.env.REDIS_URL ?? "redis://localhost:6379",
+  cacheTtlSeconds: Number(process.env.CACHE_TTL_SECONDS ?? 86400),
 };
 
 if (config.provider === "groq" && !config.groqApiKey) {
