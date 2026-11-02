@@ -1,4 +1,4 @@
-import { response, Router } from "express";
+import { Router } from "express";
 import { provider } from "../providers";
 import *  as exactCache from "../cache/exact";
 
@@ -46,7 +46,7 @@ chatRouter.post("/chat", async (req, res) => {
         });
     } catch (err) {
         const detail = err instanceof Error ? err.message : String(err);
-        console.log("Provider call failed:", detail);
+        console.error("Provider call failed:", detail);
         return res.status(502).json({
             error: "Upstream provider call failed",
             detail,
